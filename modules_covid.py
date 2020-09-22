@@ -96,23 +96,23 @@ cases_pT_new = cases_pT.diff(axis=1)
 deaths_pT_new = deaths_pT.diff(axis=1)
 
 # uncomment this to make the lattest plots at the map, takes some while (coordinates):
-json_files = {}
-dic={}
-for name in cases.index:
-    coord = get_coordinates(name)
-    dic[name] = coord
-    df = cases_pT_new.T[name].to_frame(name='cases')
-    df['deaths*10'] = deaths_pT_new.T[name]*10
-    line = v.Line(df.rolling(7, center=True, min_periods=1).mean())
-    line.axis_titles(x='Date', y='per 100k inhabitants')
-    line.legend(name)
-    line.width = 350
-    line.height = 150
-    json_files[name] = str(line.to_json())
-df = pd.DataFrame(dic,index=['lat','long']).T
-df2 = pd.DataFrame(json_files,index=['json']).T
-df['json'] = df2
-coord = df.copy()
-coord.to_csv('data/coord.csv')
+# json_files = {}
+# dic={}
+# for name in cases.index:
+#     coord = get_coordinates(name)
+#     dic[name] = coord
+#     df = cases_pT_new.T[name].to_frame(name='cases')
+#     df['deaths*10'] = deaths_pT_new.T[name]*10
+#     line = v.Line(df.rolling(7, center=True, min_periods=1).mean())
+#     line.axis_titles(x='Date', y='per 100k inhabitants')
+#     line.legend(name)
+#     line.width = 350
+#     line.height = 150
+#     json_files[name] = str(line.to_json())
+# df = pd.DataFrame(dic,index=['lat','long']).T
+# df2 = pd.DataFrame(json_files,index=['json']).T
+# df['json'] = df2
+# coord = df.copy()
+# coord.to_csv('data/coord.csv')
 
 coord = pd.read_csv('data/coord.csv', index_col=0)
