@@ -1,6 +1,6 @@
 ## Clustering COVID-19 time series
 
-Article explaining the details of the study:
+Article explaining the details of the study:  
 https://towardsdatascience.com/which-countries-are-affected-the-most-by-covid-19-4d4570852e31
 
 ## Recommened to view the Notebook here:
