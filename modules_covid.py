@@ -1,16 +1,8 @@
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import matplotlib.cm as cm
-import matplotlib.colors as colors
 from geopy.geocoders import Nominatim
 import vincent as v
 v.core.initialize_notebook()
-from folium import (plugins, FeatureGroup, Map, Circle, Marker,
-                    LayerControl, Popup, CircleMarker, Vega)
-from tslearn.clustering import TimeSeriesKMeans
 
 def get_coordinates(address):    
     try:
@@ -70,49 +62,31 @@ def import_data_JHU():
     deaths.to_csv('data/deaths.csv')
     return True
 
-# uncomment this line to import the latest data
 
-import_data_JHU()
+def create_data_plots_map():
+    json_files = {}
+    dic={}
+    for name in cases.index:
+        coord = get_coordinates(name)
+        dic[name] = coord
+        df = cases_pT_new.T[name].to_frame(name='cases')
+        df['deaths*10'] = deaths_pT_new.T[name]*10
+        line = v.Line(df.rolling(7, center=True, min_periods=1).mean())
+        line.axis_titles(x='Date', y='per 100k inhabitants')
+        line.legend(name)
+        line.width = 350
+        line.height = 150
+        json_files[name] = str(line.to_json())
+    df = pd.DataFrame(dic,index=['lat', 'long']).T
+    df2 = pd.DataFrame(json_files,index=['json']).T
+    df['json'] = df2
+    coord = df.copy()
+    coord.to_csv('data/coord.csv')
+    return True
 
-cases = pd.read_csv('data/cases.csv', index_col=0)
-deaths = pd.read_csv('data/deaths.csv', index_col=0)
-cases = change_col_dt(cases)
-deaths = change_col_dt(deaths)
 
-last_day = cases.columns[-1]
-print('The data is from ' +
-      str(pd.to_datetime(cases.columns[-1]).strftime('%d/%m/%Y')) + '.')
 
-population_2018 = pd.read_csv('data/population_2018_2.csv', index_col=0)
-population_2018.rename(index={'United Kingdom': 'UK'}, inplace=True)
-population_2018.loc['Italy'] = population_2018.loc['Italy'] + population_2018.loc['San Marino']
-population_2018.drop('San Marino', inplace=True)
-# confirmed cases for each 100k inhabitans
 
-cases_pT =  cases / population_2018.loc[cases.index].values * 100000
-deaths_pT = deaths / population_2018.loc[deaths.index].values * 100000
-cases_pT.sort_values([last_day], ascending=False, axis=0, inplace=True)
-cases_pT_new = cases_pT.diff(axis=1)
-deaths_pT_new = deaths_pT.diff(axis=1)
 
-# uncomment this to make the lattest plots at the map, takes some while (coordinates):
-# json_files = {}
-# dic={}
-# for name in cases.index:
-#     coord = get_coordinates(name)
-#     dic[name] = coord
-#     df = cases_pT_new.T[name].to_frame(name='cases')
-#     df['deaths*10'] = deaths_pT_new.T[name]*10
-#     line = v.Line(df.rolling(7, center=True, min_periods=1).mean())
-#     line.axis_titles(x='Date', y='per 100k inhabitants')
-#     line.legend(name)
-#     line.width = 350
-#     line.height = 150
-#     json_files[name] = str(line.to_json())
-# df = pd.DataFrame(dic,index=['lat','long']).T
-# df2 = pd.DataFrame(json_files,index=['json']).T
-# df['json'] = df2
-# coord = df.copy()
-# coord.to_csv('data/coord.csv')
 
-coord = pd.read_csv('data/coord.csv', index_col=0)
+
